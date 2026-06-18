@@ -1,0 +1,33 @@
+# Python
+__pycache__/
+*.py[cod]
+*.pyo
+
+# Environment
+.env
+
+# Virtual Environment
+venv/
+.venv/
+
+# VS Code
+.vscode/
+
+# macOS
+.DS_Store
+
+# Logs
+*.log
+
+# Database
+*.db
+
+# Export
+exports/
+*.pptx
+
+# Pytest
+.pytest_cache/
+
+# Docker
+*.pid
