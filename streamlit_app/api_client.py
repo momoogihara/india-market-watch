@@ -1,6 +1,6 @@
 import requests
 
-BASE_URL = "http://localhost:8000"
+BASE_URL = "http://api:8000"
 
 def get_articles():
     res = requests.get(f"{BASE_URL}/articles")
