@@ -10,7 +10,7 @@ services:
     volumes:
       - pgdata:/var/lib/postgresql/data
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER} -d ${POSTGRES_DB}"]
+      test: ["CMD-SHELL","pg_isready -U ${POSTGRES_USER} -d ${POSTGRES_DB}"]
       interval: 5s
       timeout: 5s
       retries: 5
@@ -22,6 +22,21 @@ services:
       - .env
     ports:
       - "8000:8000"
+    depends_on:
+      db:
+        condition: service_healthy
+
+  streamlit:
+    build: .
+    restart: always
+    env_file:
+      - .env
+    command: >
+      streamlit run streamlit_app/app.py
+      --server.port=8501
+      --server.address=0.0.0.0
+    ports:
+      - "8501:8501"
     depends_on:
       db:
         condition: service_healthy
