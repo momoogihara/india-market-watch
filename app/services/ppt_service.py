@@ -145,7 +145,8 @@ def generate_sample_ppt(
     bullish_count: str,
     bearish_count: str,
     neutral_count: str,
-    headline_text: str
+    headline_text: str,
+    output_file="india_market_watch.pptx"
 ) -> str:
     prs = Presentation()
     prs.slide_width = Inches(13.333)
@@ -343,8 +344,10 @@ def generate_sample_ppt(
     if not os.path.exists(root_dir):
         root_dir = os.getcwd()
         
-    file_name = "india_market_watch.pptx"
-    file_path = "india_market_watch.pptx"
+    # file_name = "india_market_watch.pptx"
+    # file_path = "india_market_watch.pptx"
+
+    file_path = output_file
     
     prs.save(file_path)
     

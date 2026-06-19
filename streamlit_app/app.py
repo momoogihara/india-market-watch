@@ -42,31 +42,26 @@ menu = st.sidebar.selectbox(
 # ======================
 def ensure_articles():
     articles = get_articles()
+
     if not articles:
         with st.spinner("Importing RSS articles..."):
             import_rss()
         articles = get_articles()
+
     return articles
 # ======================
 # Dashboard
 # ======================
 st.title("📊 India Market Watch Dashboard")
 if menu == "Dashboard":
-    articles = get_articles()
-    if not articles:
-        import_rss()
-        articles = get_articles()
+    articles = ensure_articles()
     snapshot = get_market_snapshot()
     render_dashboard(snapshot)
     # ======================
     # 🧠 sentiment
     # ======================
     import random
-    articles = get_articles()
-    if not articles:
-        with st.spinner("Importing RSS articles..."):
-            import_rss()
-        articles = get_articles()
+    articles = ensure_articles()
     sectors = []
     sentiments = []
 
@@ -137,11 +132,7 @@ elif menu == "Articles":
 
     import random  # STEP2用（仮セクター・センチメント）
     
-    articles = get_articles()
-    if not articles:
-        with st.spinner("Importing RSS articles..."):
-            import_rss()
-        articles = get_articles()
+    articles = ensure_articles()
     if st.button("🔄 Refresh Articles"):
         st.rerun()
 
@@ -372,9 +363,22 @@ elif menu == "AI Generate":
                     bullish_count=str(bullish_c),
                     bearish_count=str(bearish_c),
                     neutral_count=str(neutral_c),
-                    headline_text="\n".join([a.get("title", "") for a in result_data.get("articles", [])[:5]])
+                    headline_text="\n".join([a.get("title", "") for a in result_data.get("articles", [])[:5]]),
+                    output_file="india_market_watch.pptx"
                 )
                 st.session_state.ppt_generated = True
+
+                if (
+                st.session_state.ppt_generated
+                and st.session_state.ppt_file_path
+                ):
+                    with open(st.session_state.ppt_file_path, "rb") as f:
+                        st.download_button(
+                            label="⬇ Download PPT",
+                            data=f,
+                            file_name=os.path.basename(st.session_state.ppt_file_path),
+                            mime="application/vnd.openxmlformats-officedocument.presentationml.presentation"
+                        )
 
     # else:
     #     # まだ最初の「🚀 Generate Report」自体を押していない時の案内
