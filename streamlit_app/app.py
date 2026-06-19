@@ -11,7 +11,8 @@ from api_client import (
     get_market_reports,
     generate_report,
     get_market_snapshot,
-    get_market_trends
+    get_market_trends,
+    import_rss
 )
 import plotly.express as px
 from app.services.ppt_service import generate_sample_ppt  # これで正しくルートのappパッケージが見つかります
@@ -37,19 +38,35 @@ menu = st.sidebar.selectbox(
     ]
 )
 # ======================
+# #RSS取り込み処理
+# ======================
+def ensure_articles():
+    articles = get_articles()
+    if not articles:
+        with st.spinner("Importing RSS articles..."):
+            import_rss()
+        articles = get_articles()
+    return articles
+# ======================
 # Dashboard
 # ======================
 st.title("📊 India Market Watch Dashboard")
 if menu == "Dashboard":
+    articles = get_articles()
+    if not articles:
+        import_rss()
+        articles = get_articles()
     snapshot = get_market_snapshot()
     render_dashboard(snapshot)
-    articles = get_articles()
-
     # ======================
     # 🧠 sentiment
     # ======================
     import random
     articles = get_articles()
+    if not articles:
+        with st.spinner("Importing RSS articles..."):
+            import_rss()
+        articles = get_articles()
     sectors = []
     sentiments = []
 
@@ -93,22 +110,25 @@ if menu == "Dashboard":
 
     with right:
         df = pd.DataFrame(ranking[:5])
-        fig = px.bar(
-        df,
-        y="sector",
-        x="bullish_score",
-        orientation="h"
-        )
-        fig.update_layout(
-            yaxis=dict(
-                autorange="reversed"
-            ),
-            showlegend=False
+        if df.empty:
+            st.info("No ranking data yet. Please import RSS articles.")
+        else:
+            fig = px.bar(
+            df,
+            y="sector",
+            x="bullish_score",
+            orientation="h"
             )
-        st.plotly_chart(
-            fig,
-            use_container_width=True
-        )
+            fig.update_layout(
+                yaxis=dict(
+                    autorange="reversed"
+                ),
+                showlegend=False
+                )
+            st.plotly_chart(
+                fig,
+                use_container_width=True
+            )
 # ======================
 # Articles
 # ======================
@@ -118,6 +138,10 @@ elif menu == "Articles":
     import random  # STEP2用（仮セクター・センチメント）
     
     articles = get_articles()
+    if not articles:
+        with st.spinner("Importing RSS articles..."):
+            import_rss()
+        articles = get_articles()
     if st.button("🔄 Refresh Articles"):
         st.rerun()
 
@@ -355,7 +379,8 @@ elif menu == "AI Generate":
     # else:
     #     # まだ最初の「🚀 Generate Report」自体を押していない時の案内
     #     st.info("💡 「🚀 Generate Report」ボタンを押すと、AIレポートの確認とPPTのダウンロードができるようになります。")
-    # # ======================
+
+        # # ======================
     # # INSIGHTS LAYER（修正版）
     # # ======================
 
