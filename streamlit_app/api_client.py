@@ -14,6 +14,11 @@ def generate_report():
     res = requests.get(f"{BASE_URL}/market-report/generate")
     return res.json()
 
+def import_rss():
+    response = requests.post(f"{BASE_URL}/articles/import-rss")
+    response.raise_for_status()
+    return response.json()
+
 def get_market_snapshot():
     return requests.get(
         f"{BASE_URL}/articles/market-snapshot"
