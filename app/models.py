@@ -2,6 +2,7 @@ from sqlalchemy import Column, Integer, String, Text, DateTime ,func
 from datetime import datetime
 from app.db import Base
 from sqlalchemy.dialects.postgresql import JSONB
+from sqlalchemy import Boolean, Column
 
 class Article(Base):
     __tablename__ = "articles"
@@ -25,6 +26,8 @@ class Article(Base):
     sector = Column(String, index=True, nullable=True)
 
     created_at = Column(DateTime, default=datetime.utcnow)
+
+    embedded = Column(Boolean, default=False)
 
 # #レポート履歴保存用テーブル(day18追加)
 class MarketReport(Base):

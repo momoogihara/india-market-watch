@@ -63,6 +63,7 @@ def import_rss_articles(db):
         exists = article_repository.get_by_url(db,a["source_url"])
 
         if exists:
+            print("SKIP EXISTS:", a["source_url"])
             continue
         
         article = article_repository.create(db, ArticleCreate(**a))

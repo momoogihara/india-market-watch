@@ -150,3 +150,12 @@ def get_articles_since(db, days):
         )
         .all()
     )
+
+
+#phase2_RAG同期
+class ArticleRepository:
+    def __init__(self, db):
+            self.db = db
+
+    def get_all_articles(self):
+            return self.db.query(Article).all()
