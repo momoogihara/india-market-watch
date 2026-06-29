@@ -13,7 +13,7 @@ class Article(Base):
     content = Column(Text)
 
     source = Column(String)
-    source_url = Column(String, unique=True)
+    source_url = Column(String, unique=True, index=True)
 
     published_at = Column(DateTime)
 

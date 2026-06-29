@@ -9,6 +9,11 @@ import os
 from pydantic import BaseModel
 from app.rag.chat import chat
 from app.rag.vectorstore import add_document
+from app.api.chat import router as chat_router
+from app.api.document import router as document_router
+
+from app.api.sync import router as sync_router
+from app.api.search import router as search_router
 
 
 app = FastAPI()
@@ -21,19 +26,22 @@ def startup():
 app.include_router(article_router, prefix="/articles", tags=["Articles"])
 app.include_router(market_report.router, tags=["Market Reports"])
 app.include_router(ppt_router)
-
+app.include_router(chat_router)
+app.include_router(document_router)
+app.include_router(sync_router)
+app.include_router(search_router)
 
 @app.get("/")
 def root():
     return {"message": "India Market Watch"}
 
 
-class ChatRequest(BaseModel):
-    query: str
+# class ChatRequest(BaseModel):
+#     query: str
 
-@app.post("/chat")
-def chat_endpoint(req: ChatRequest):
-    return chat(req.query)
+# @app.post("/chat")
+# def chat_endpoint(req: ChatRequest):
+#     return chat(req.query)
 
 
 # テスト用：ニュース投入

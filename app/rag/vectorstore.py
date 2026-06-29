@@ -29,27 +29,51 @@ def add_document(doc_id: str, text: str, metadata: dict = None):
     )
 
 
-def search(query: str, k: int = 5):
-    query_embedding = get_embedding(query)
+# vector DB専用ファイル
+from datetime import datetime, timedelta
 
+def search(query_embedding, top_k: int = 5):
     results = collection.query(
         query_embeddings=[query_embedding],
-        n_results=k,
-        include=["documents", "metadatas"]
+        n_results=30,   # ← 少し多めに取得
+        include=[
+            "documents",
+            "metadatas",
+            "distances"
+        ]
     )
 
-    docs = []
+    output = []
 
-    for document, metadata in zip(
-        results["documents"][0],
-        results["metadatas"][0]
-    ):
-        docs.append({
-            "text": document,
-            "metadata": metadata,
+    cutoff = datetime.now() - timedelta(days=30)
+
+    for doc, meta, distance in zip(
+            results["documents"][0],
+            results["metadatas"][0],
+            results["distances"][0]
+        ):
+
+        published_at = meta.get("published_at")
+
+        if published_at:
+            try:
+                published_at = datetime.fromisoformat(
+                    published_at.replace(" ", "T")
+                )
+            except Exception:
+                continue
+            if published_at < cutoff:
+                continue
+        output.append({
+            "text": doc,
+            "metadata": {
+                **meta,
+                "vector_distance": distance,
+                "vector_score": 1 / (1 + distance)
+            }
         })
+    return output[:top_k]
 
-    return docs
 #ChromaDBをリセットする機能
 def reset_collection():
     """
@@ -64,3 +88,13 @@ def reset_collection():
         pass
 
     collection = client.get_or_create_collection(name="india_news")
+
+# def keyword_search(query: str, limit: int = 20):
+#     sql = """
+#     SELECT content, metadata
+#     FROM chunks
+#     WHERE content ILIKE %s
+#     LIMIT %s
+#     """
+
+#     return db.execute(sql, (f"%{query}%", limit)).fetchall()
